@@ -2,6 +2,7 @@ package volume_mount_options_test
 
 import (
 	vmo "code.cloudfoundry.org/volume-mount-options"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -13,10 +14,11 @@ var _ = Describe("VolumeMountOptions", func() {
 			defaultOpts   map[string]string
 			ignoredOpts   []string
 			mandatoryOpts []string
-			opts          vmo.MountOpts
+			actualRes     vmo.MountOpts
 			err           error
 
 			userInput map[string]interface{}
+			mask vmo.MountOptsMask
 		)
 
 		BeforeEach(func() {
@@ -24,14 +26,15 @@ var _ = Describe("VolumeMountOptions", func() {
 			defaultOpts = map[string]string{}
 			ignoredOpts = []string{}
 			mandatoryOpts = []string{}
+
+			userInput = map[string]interface{}{}
 		})
 
 		JustBeforeEach(func() {
-			var mask vmo.MountOptsMask
 			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, ignoredOpts, mandatoryOpts)
 			Expect(err).NotTo(HaveOccurred())
 
-			opts, err = vmo.NewMountOpts(userInput, mask)
+			actualRes, err = vmo.NewMountOpts(userInput, mask)
 		})
 
 		Context("when given a set of options", func() {
@@ -46,8 +49,17 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			It("should return those options", func() {
 				Expect(err).NotTo(HaveOccurred())
-				Expect(opts).To(HaveKeyWithValue("opt1", "val1"))
-				Expect(opts).To(HaveKeyWithValue("opt2", "val2"))
+				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
+					"opt1":"val1",
+					"opt2":"val2",
+				}))
+			})
+		})
+
+		Context("when given an empty set of opts", func() {
+			It("should return those options", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(actualRes).To(BeEmpty())
 			})
 		})
 
@@ -67,9 +79,25 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			It("should return those options", func() {
 				Expect(err).NotTo(HaveOccurred())
-				Expect(opts).To(HaveKeyWithValue("opt1", "val1"))
-				Expect(opts).To(HaveKeyWithValue("opt2", "val2"))
-				Expect(opts).To(HaveKeyWithValue("opt3", "default3"))
+				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
+					"opt1":"val1",
+					"opt2":"val2",
+					"opt3":"default3",
+				}))
+			})
+
+			It("should set sloppy_mount to false", func() {
+				Expect(mask.SloppyMount).To(BeFalse())
+			})
+
+			Context("when there isnt any user input", func() {
+				BeforeEach(func() {
+					userInput = map[string]interface{}{}
+				})
+				It("should return the default options", func(){
+					Expect(err).NotTo(HaveOccurred())
+					Expect(map[string]string(actualRes)).To(Equal(defaultOpts))
+				})
 			})
 		})
 
@@ -99,9 +127,14 @@ var _ = Describe("VolumeMountOptions", func() {
 
 				It("should return those options", func() {
 					Expect(err).NotTo(HaveOccurred())
-					Expect(opts).To(HaveKeyWithValue("opt1", "val1"))
-					Expect(opts).NotTo(HaveKey("opt2"))
-					Expect(opts).NotTo(HaveKey("opt3"))
+					Expect(map[string]string(actualRes)).To(Equal(map[string]string{
+						"opt1":"val1",
+						"sloppy_mount":"true",
+					}))
+				})
+
+				It("should set sloppy_mount to true", func() {
+					Expect(mask.SloppyMount).To(BeTrue())
 				})
 			})
 		})
@@ -117,7 +150,7 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			It("should create a MountOpts without the ignored option", func() {
 				Expect(err).NotTo(HaveOccurred())
-				Expect(opts).NotTo(HaveKey("something"))
+				Expect(map[string]string(actualRes)).To(BeEmpty())
 			})
 		})
 
@@ -152,22 +185,34 @@ var _ = Describe("VolumeMountOptions", func() {
 					"bool2":                false,
 				}
 
-				allowedOpts = []string{"int", "int8", "int16", "int32", "int64", "float32", "float64", "auto-traverse-mounts", "dircache", "bool1", "bool2"}
+				allowedOpts = []string{
+					"int",
+					"int8",
+					"int16",
+					"int32",
+					"int64",
+					"float32",
+					"float64",
+					"auto-traverse-mounts",
+					"dircache",
+					"bool1",
+					"bool2",
+				}
 			})
 
 			It("convert values to strings", func() {
 				Expect(err).NotTo(HaveOccurred())
-				Expect(opts).To(HaveKeyWithValue("int", "1"))
-				Expect(opts).To(HaveKeyWithValue("int8", "2"))
-				Expect(opts).To(HaveKeyWithValue("int16", "3"))
-				Expect(opts).To(HaveKeyWithValue("int32", "4"))
-				Expect(opts).To(HaveKeyWithValue("int64", "5"))
-				Expect(opts).To(HaveKeyWithValue("float32", "1"))
-				Expect(opts).To(HaveKeyWithValue("float64", "2"))
-				Expect(opts).To(HaveKeyWithValue("auto-traverse-mounts", "1"))
-				Expect(opts).To(HaveKeyWithValue("dircache", "0"))
-				Expect(opts).To(HaveKeyWithValue("bool1", "true"))
-				Expect(opts).To(HaveKeyWithValue("bool2", "false"))
+				Expect(actualRes).To(HaveKeyWithValue("int", "1"))
+				Expect(actualRes).To(HaveKeyWithValue("int8", "2"))
+				Expect(actualRes).To(HaveKeyWithValue("int16", "3"))
+				Expect(actualRes).To(HaveKeyWithValue("int32", "4"))
+				Expect(actualRes).To(HaveKeyWithValue("int64", "5"))
+				Expect(actualRes).To(HaveKeyWithValue("float32", "1"))
+				Expect(actualRes).To(HaveKeyWithValue("float64", "2"))
+				Expect(actualRes).To(HaveKeyWithValue("auto-traverse-mounts", "1"))
+				Expect(actualRes).To(HaveKeyWithValue("dircache", "0"))
+				Expect(actualRes).To(HaveKeyWithValue("bool1", "true"))
+				Expect(actualRes).To(HaveKeyWithValue("bool2", "false"))
 			})
 		})
 
@@ -181,85 +226,11 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			It("does not return a 'not allowed options' error", func() {
 				Expect(err).NotTo(HaveOccurred())
-				Expect(opts).To(HaveKeyWithValue("something", "default"))
-			})
-		})
-
-		Context("Given allowed and default params", func() {
-			var (
-				options      map[string]interface{}
-				ignoreList   []string
-				allowed      []string
-				mountOptions map[string]string
-				actualRes    vmo.MountOpts
-				mask         vmo.MountOptsMask
-			)
-
-			BeforeEach(func() {
-				options = make(map[string]interface{}, 0)
-				ignoreList = make([]string, 0)
-
-				allowed = []string{"sloppy_mount", "nfs_uid", "nfs_gid", "allow_other", "uid", "gid", "auto-traverse-mounts", "dircache", "foo", "bar", "flo"}
-				mountOptions = map[string]string{
-					"nfs_uid": "1003",
-					"nfs_gid": "1001",
-					"uid":     "1004",
-					"gid":     "1002",
-				}
-
-				mask, err = vmo.NewMountOptsMask(allowed, mountOptions, ignoreList, []string{})
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			It("should flow sloppy_mount as disabled", func() {
-				Expect(mask.SloppyMount).To(BeFalse())
-			})
-
-			Context("Given empty arbitrary params and share without any params", func() {
-				BeforeEach(func() {
-					actualRes, err = vmo.NewMountOpts(options, mask)
-				})
-
-				It("should return nil result on setting end users'entries", func() {
-					Expect(err).NotTo(HaveOccurred())
-				})
-
-				It("should pass the default options into the MountOptions struct", func() {
-					for k, exp := range mountOptions {
-						Expect(inMapInt(actualRes, k, exp)).To(BeTrue())
-					}
-
-					for k, exp := range actualRes {
-						Expect(inMapInt(mountOptions, k, exp)).To(BeTrue())
-					}
-				})
+				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
+					"something":"default",
+				}))
 			})
 		})
 	})
 })
 
-func MatchExactly(actual, expected map[string]string) bool {
-	for k, exp := range expected {
-		Expect(inMapInt(actual, k, exp)).To(BeTrue())
-	}
-
-	for k, exp := range actual {
-		Expect(inMapInt(expected, k, exp)).To(BeTrue())
-	}
-}
-
-func inMapInt(list map[string]string, key string, val string) bool {
-	for k, v := range list {
-		if k != key {
-			continue
-		}
-
-		if v == val {
-			return true
-		} else {
-			return false
-		}
-	}
-
-	return false
-}
