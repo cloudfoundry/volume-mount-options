@@ -19,7 +19,7 @@ var _ = Describe("VolumeMountOptions", func() {
 			err           error
 
 			userInput map[string]interface{}
-			mask vmo.MountOptsMask
+			mask      vmo.MountOptsMask
 		)
 
 		BeforeEach(func() {
@@ -52,8 +52,8 @@ var _ = Describe("VolumeMountOptions", func() {
 			It("should return those options", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
-					"opt1":"val1",
-					"opt2":"val2",
+					"opt1": "val1",
+					"opt2": "val2",
 				}))
 			})
 		})
@@ -82,9 +82,9 @@ var _ = Describe("VolumeMountOptions", func() {
 			It("should return those options", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
-					"opt1":"val1",
-					"opt2":"val2",
-					"opt3":"default3",
+					"opt1": "val1",
+					"opt2": "val2",
+					"opt3": "default3",
 				}))
 			})
 
@@ -96,7 +96,7 @@ var _ = Describe("VolumeMountOptions", func() {
 				BeforeEach(func() {
 					userInput = map[string]interface{}{}
 				})
-				It("should return the default options", func(){
+				It("should return the default options", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(map[string]string(actualRes)).To(Equal(defaultOpts))
 				})
@@ -130,8 +130,8 @@ var _ = Describe("VolumeMountOptions", func() {
 				It("should return those options", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(map[string]string(actualRes)).To(Equal(map[string]string{
-						"opt1":"val1",
-						"sloppy_mount":"true",
+						"opt1":         "val1",
+						"sloppy_mount": "true",
 					}))
 				})
 
@@ -285,10 +285,9 @@ var _ = Describe("VolumeMountOptions", func() {
 			It("does not return a 'not allowed options' error", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
-					"something":"default",
+					"something": "default",
 				}))
 			})
 		})
 	})
 })
-
