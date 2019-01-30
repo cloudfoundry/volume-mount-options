@@ -13,13 +13,19 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 	errorList := []string{}
 
 	for k, v := range userOpts {
-		if inArray(mask.Ignored, k) {
+		var canonicalKey string
+		var ok bool
+		if canonicalKey, ok = mask.KeyPerms[k]; !ok {
+			canonicalKey = k
+		}
+
+		if inArray(mask.Ignored, canonicalKey) {
 			continue
 		}
 
-		if inArray(mask.Allowed, k) {
-			uv := uniformKeyData(k, v)
-			mountOpts[k] = uv
+		if inArray(mask.Allowed, canonicalKey) {
+			uv := uniformKeyData(canonicalKey, v)
+			mountOpts[canonicalKey] = uv
 		} else if !mask.SloppyMount {
 			errorList = append(errorList, k)
 		}

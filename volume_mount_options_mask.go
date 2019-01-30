@@ -13,6 +13,9 @@ type MountOptsMask struct {
 	// set of default values that will be used if not otherwise provided
 	Defaults map[string]string
 
+	// set of key permutations
+	KeyPerms map[string]string
+
 	// set of options that, if provided,  will be silently ignored
 	Ignored []string
 
@@ -22,10 +25,11 @@ type MountOptsMask struct {
 	SloppyMount bool
 }
 
-func NewMountOptsMask(allowed []string, defaults map[string]string, ignored, mandatory []string) (MountOptsMask, error) {
+func NewMountOptsMask(allowed []string, defaults, keyPerms map[string]string, ignored, mandatory []string) (MountOptsMask, error) {
 	mask := MountOptsMask{
 		Allowed:   allowed,
 		Defaults:  defaults,
+		KeyPerms:  keyPerms,
 		Ignored:   ignored,
 		Mandatory: mandatory,
 	}

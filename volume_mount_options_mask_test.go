@@ -14,6 +14,7 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 			allowedOpts   []string
 			defaultOpts   map[string]string
 			ignoredOpts   []string
+			keyPerms      map[string]string
 			mandatoryOpts []string
 			err           error
 		)
@@ -22,11 +23,12 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 			allowedOpts = []string{}
 			defaultOpts = map[string]string{}
 			ignoredOpts = []string{}
+			keyPerms = map[string]string{}
 			mandatoryOpts = []string{}
 		})
 
 		JustBeforeEach(func() {
-			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, ignoredOpts, mandatoryOpts)
+			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts)
 		})
 
 		Context("when given a set of allowed options", func() {
@@ -64,6 +66,20 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 			It("should store those ignored options", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(mask.Ignored).To(ContainElement("something"))
+			})
+		})
+
+		Context("when given a set of key permutations", func() {
+			BeforeEach(func() {
+				keyPerms = map[string]string{
+					"opt1": "converted1",
+					"opt2": "converted2",
+				}
+			})
+
+			It("should store the key permutation information", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(mask.KeyPerms).To(Equal(keyPerms))
 			})
 		})
 

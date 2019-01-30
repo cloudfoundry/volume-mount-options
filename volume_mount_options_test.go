@@ -13,6 +13,7 @@ var _ = Describe("VolumeMountOptions", func() {
 			allowedOpts   []string
 			defaultOpts   map[string]string
 			ignoredOpts   []string
+			keyPerms      map[string]string
 			mandatoryOpts []string
 			actualRes     vmo.MountOpts
 			err           error
@@ -25,13 +26,14 @@ var _ = Describe("VolumeMountOptions", func() {
 			allowedOpts = []string{}
 			defaultOpts = map[string]string{}
 			ignoredOpts = []string{}
+			keyPerms = map[string]string{}
 			mandatoryOpts = []string{}
 
 			userInput = map[string]interface{}{}
 		})
 
 		JustBeforeEach(func() {
-			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, ignoredOpts, mandatoryOpts)
+			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts)
 			Expect(err).NotTo(HaveOccurred())
 
 			actualRes, err = vmo.NewMountOpts(userInput, mask)
@@ -135,6 +137,46 @@ var _ = Describe("VolumeMountOptions", func() {
 
 				It("should set sloppy_mount to true", func() {
 					Expect(mask.SloppyMount).To(BeTrue())
+				})
+			})
+		})
+
+		Context("when given a set of key permutations", func() {
+			BeforeEach(func() {
+				userInput = map[string]interface{}{
+					"something": "some-value",
+					"thing1":    "",
+				}
+
+				allowedOpts = []string{"something-else", "thing2"}
+				keyPerms = map[string]string{
+					"something": "something-else",
+					"thing1":    "thing2",
+				}
+			})
+
+			It("should create a MountOpts with the canonicalised key names", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(map[string]string(actualRes)).To(Equal(map[string]string{
+					"something-else": "some-value",
+					"thing2":         "",
+				}))
+			})
+
+			Context("when a permuted option is not allowed", func() {
+				BeforeEach(func() {
+					userInput = map[string]interface{}{
+						"something": "some-value",
+					}
+
+					allowedOpts = []string{}
+					keyPerms = map[string]string{
+						"something": "something-else",
+					}
+				})
+
+				It("should return an error", func() {
+					Expect(err.Error()).To(Equal("Not allowed options: something"))
 				})
 			})
 		})
