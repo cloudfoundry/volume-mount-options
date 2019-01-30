@@ -209,6 +209,22 @@ var _ = Describe("VolumeMountOptions", func() {
 				Expect(err.Error()).To(ContainSubstring("required1"))
 				Expect(err.Error()).To(ContainSubstring("required2"))
 			})
+
+			Context("when given a set of key permutations", func() {
+				BeforeEach(func() {
+					userInput = map[string]interface{}{}
+
+					allowedOpts = []string{"required2", "required3"}
+					keyPerms = map[string]string{"required1": "required3"}
+					mandatoryOpts = []string{"required2", "required3"}
+				})
+
+				It("return an error", func() {
+					Expect(err.Error()).To(ContainSubstring("Missing mandatory options: "))
+					Expect(err.Error()).To(ContainSubstring("required3"))
+					Expect(err.Error()).To(ContainSubstring("required2"))
+				})
+			})
 		})
 
 		Context("given int and bool options", func() {

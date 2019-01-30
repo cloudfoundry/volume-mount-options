@@ -36,7 +36,7 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 	}
 
 	for _, k := range mask.Mandatory {
-		if _, ok := userOpts[k]; !ok {
+		if _, ok := mountOpts[k]; !ok {
 			errorList = append(errorList, k)
 		}
 	}
