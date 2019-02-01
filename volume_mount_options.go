@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type MountOpts map[string]string
+type MountOpts map[string]interface{}
 
 func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpts, error) {
 	mountOpts := mask.Defaults
@@ -72,7 +72,6 @@ func uniformKeyData(key string, data interface{}) string {
 }
 
 func uniformData(data interface{}, boolAsInt bool) string {
-
 	switch data.(type) {
 	case int, int8, int16, int32, int64, float32, float64:
 		return fmt.Sprintf("%#v", data)

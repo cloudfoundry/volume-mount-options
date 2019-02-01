@@ -3,6 +3,7 @@ package volume_mount_options
 import (
 	"strconv"
 
+	"code.cloudfoundry.org/volume-mount-options/utils"
 	werror "github.com/pkg/errors"
 )
 
@@ -11,7 +12,7 @@ type MountOptsMask struct {
 	Allowed []string
 
 	// set of default values that will be used if not otherwise provided
-	Defaults map[string]string
+	Defaults map[string]interface{}
 
 	// set of key permutations
 	KeyPerms map[string]string
@@ -25,7 +26,7 @@ type MountOptsMask struct {
 	SloppyMount bool
 }
 
-func NewMountOptsMask(allowed []string, defaults, keyPerms map[string]string, ignored, mandatory []string) (MountOptsMask, error) {
+func NewMountOptsMask(allowed []string, defaults map[string]interface{}, keyPerms map[string]string, ignored, mandatory []string) (MountOptsMask, error) {
 	mask := MountOptsMask{
 		Allowed:   allowed,
 		Defaults:  defaults,
@@ -35,12 +36,14 @@ func NewMountOptsMask(allowed []string, defaults, keyPerms map[string]string, ig
 	}
 
 	if defaults == nil {
-		mask.Defaults = make(map[string]string)
+		mask.Defaults = make(map[string]interface{})
 	}
 
 	if v, ok := defaults["sloppy_mount"]; ok {
+		vc := utils.InterfaceToString(v)
+
 		var err error
-		mask.SloppyMount, err = strconv.ParseBool(v)
+		mask.SloppyMount, err = strconv.ParseBool(vc)
 
 		if err != nil {
 			return MountOptsMask{}, werror.Wrap(err, "Invalid sloppy_mount option")

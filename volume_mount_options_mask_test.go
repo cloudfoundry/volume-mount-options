@@ -12,7 +12,7 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 			mask vmo.MountOptsMask
 
 			allowedOpts   []string
-			defaultOpts   map[string]string
+			defaultOpts   map[string]interface{}
 			ignoredOpts   []string
 			keyPerms      map[string]string
 			mandatoryOpts []string
@@ -21,7 +21,7 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 
 		BeforeEach(func() {
 			allowedOpts = []string{}
-			defaultOpts = map[string]string{}
+			defaultOpts = map[string]interface{}{}
 			ignoredOpts = []string{}
 			keyPerms = map[string]string{}
 			mandatoryOpts = []string{}
@@ -41,11 +41,15 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 				Expect(mask.Allowed).To(ContainElement("opt1"))
 				Expect(mask.Allowed).To(ContainElement("opt2"))
 			})
+
+			It("should set the SloppyMount flag to false", func() {
+				Expect(mask.SloppyMount).To(BeFalse())
+			})
 		})
 
 		Context("when given a set of default options", func() {
 			BeforeEach(func() {
-				defaultOpts = map[string]string{
+				defaultOpts = map[string]interface{}{
 					"opt2": "default2",
 					"opt3": "default3",
 				}
@@ -96,20 +100,35 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 		})
 
 		Context("when given a sloppy_mount in the default options", func() {
-			BeforeEach(func() {
-				defaultOpts = map[string]string{
-					"sloppy_mount": "true",
-				}
-			})
-
-			It("should set the SloppyMount flag", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(mask.SloppyMount).To(BeTrue())
-			})
-
-			Context("given sloppy_mount is set to an invalid value", func() {
+			Context("when the string is true", func() {
 				BeforeEach(func() {
-					defaultOpts = map[string]string{
+					defaultOpts = map[string]interface{}{
+						"sloppy_mount": "true",
+					}
+				})
+
+				It("should set the SloppyMount flag", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(mask.SloppyMount).To(BeTrue())
+				})
+			})
+
+			Context("when the string is false", func() {
+				BeforeEach(func() {
+					defaultOpts = map[string]interface{}{
+						"sloppy_mount": "false",
+					}
+				})
+
+				It("should not set the SloppyMount flag", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(mask.SloppyMount).To(BeFalse())
+				})
+			})
+
+			Context("given sloppy_mount is set to an invalid string", func() {
+				BeforeEach(func() {
+					defaultOpts = map[string]interface{}{
 						"sloppy_mount": "invalid",
 					}
 				})

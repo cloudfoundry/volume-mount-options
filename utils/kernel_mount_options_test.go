@@ -1,8 +1,10 @@
 package utils_test
 
 import (
-	vmo "code.cloudfoundry.org/volume-mount-options"
-	vmou "code.cloudfoundry.org/volume-mount-options/utils"
+	"fmt"
+	"math"
+
+	"code.cloudfoundry.org/volume-mount-options/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,16 +13,16 @@ import (
 var _ = Describe("KernelMountOptions", func() {
 	Describe("#ToKernelMountOptionString", func() {
 		var (
-			mountOpts          vmo.MountOpts
+			mountOpts          map[string]interface{}
 			kernelMountOptions string
 		)
 
 		BeforeEach(func() {
-			mountOpts = make(vmo.MountOpts)
+			mountOpts = make(map[string]interface{})
 		})
 
 		JustBeforeEach(func() {
-			kernelMountOptions = vmou.ToKernelMountOptionString(mountOpts)
+			kernelMountOptions = utils.ToKernelMountOptionString(mountOpts)
 		})
 
 		Context("given an empty mount opts", func() {
@@ -31,7 +33,7 @@ var _ = Describe("KernelMountOptions", func() {
 
 		Context("given a mount opts", func() {
 			BeforeEach(func() {
-				mountOpts = vmo.MountOpts{
+				mountOpts = map[string]interface{}{
 					"opt1": "val1",
 					"opt2": "val2",
 				}
@@ -44,7 +46,7 @@ var _ = Describe("KernelMountOptions", func() {
 
 		Context("given an integer option value with a leading zero", func() {
 			BeforeEach(func() {
-				mountOpts = vmo.MountOpts{
+				mountOpts = map[string]interface{}{
 					"opt1": "0123",
 				}
 			})
@@ -54,9 +56,21 @@ var _ = Describe("KernelMountOptions", func() {
 			})
 		})
 
+		Context("given an integer option value", func() {
+			BeforeEach(func() {
+				mountOpts = map[string]interface{}{
+					"opt1": math.MaxInt64,
+				}
+			})
+
+			It("strips the leading zero from the mount option string", func() {
+				Expect(kernelMountOptions).To(Equal(fmt.Sprintf("opt1=%d", math.MaxInt64)))
+			})
+		})
+
 		Context("given a mount option with no value", func() {
 			BeforeEach(func() {
-				mountOpts = vmo.MountOpts{
+				mountOpts = map[string]interface{}{
 					"does-not-matter": "",
 				}
 			})
@@ -70,7 +84,7 @@ var _ = Describe("KernelMountOptions", func() {
 	Describe("#ParseOptionStringToMap", func() {
 		var (
 			optionString string
-			opts         map[string]string
+			opts         map[string]interface{}
 		)
 
 		BeforeEach(func() {
@@ -78,7 +92,7 @@ var _ = Describe("KernelMountOptions", func() {
 		})
 
 		JustBeforeEach(func() {
-			opts = vmou.ParseOptionStringToMap(optionString, "=")
+			opts = utils.ParseOptionStringToMap(optionString, "=")
 		})
 
 		Context("given an empty option string", func() {
@@ -93,7 +107,7 @@ var _ = Describe("KernelMountOptions", func() {
 			})
 
 			It("should return an map of options", func() {
-				Expect(opts).To(Equal(map[string]string{
+				Expect(opts).To(Equal(map[string]interface{}{
 					"opt1": "val1",
 					"opt2": "val2",
 				}))
@@ -106,7 +120,7 @@ var _ = Describe("KernelMountOptions", func() {
 			})
 
 			It("should return an map of options", func() {
-				Expect(opts).To(Equal(map[string]string{
+				Expect(opts).To(Equal(map[string]interface{}{
 					"opt1": "val1",
 					"opt2": "",
 				}))
@@ -119,7 +133,7 @@ var _ = Describe("KernelMountOptions", func() {
 			})
 
 			It("should return an map of options", func() {
-				Expect(opts).To(Equal(map[string]string{
+				Expect(opts).To(Equal(map[string]interface{}{
 					"opt1": "val1",
 					"opt2": "val2=val3",
 				}))

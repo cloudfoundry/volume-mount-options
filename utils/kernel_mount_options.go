@@ -5,20 +5,25 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	vmo "code.cloudfoundry.org/volume-mount-options"
 )
 
-func ToKernelMountOptionString(mountOpts vmo.MountOpts) string {
+func ToKernelMountOptionString(mountOpts map[string]interface{}) string {
 	paramList := []string{}
 
 	for k, v := range mountOpts {
-		if val, err := strconv.ParseInt(v, 10, 16); err == nil {
-			paramList = append(paramList, fmt.Sprintf("%s=%d", k, val))
-		} else if v == "" {
-			paramList = append(paramList, k)
-		} else {
-			paramList = append(paramList, fmt.Sprintf("%s=%s", k, v))
+		switch v.(type) {
+		case string:
+			if val, err := strconv.ParseInt(v.(string), 10, 16); err == nil {
+				paramList = append(paramList, fmt.Sprintf("%s=%d", k, val))
+			} else if v == "" {
+				paramList = append(paramList, k)
+			} else {
+				paramList = append(paramList, fmt.Sprintf("%s=%s", k, v))
+			}
+		case int, int8, int16, int32, int64:
+			paramList = append(paramList, fmt.Sprintf("%s=%d", k, v))
+		case bool:
+			paramList = append(paramList, fmt.Sprintf("%s=%t", k, v))
 		}
 	}
 
@@ -26,8 +31,8 @@ func ToKernelMountOptionString(mountOpts vmo.MountOpts) string {
 	return strings.Join(paramList, ",")
 }
 
-func ParseOptionStringToMap(optionString, separator string) map[string]string {
-	mountOpts := make(map[string]string, 0)
+func ParseOptionStringToMap(optionString, separator string) map[string]interface{} {
+	mountOpts := make(map[string]interface{}, 0)
 
 	if optionString == "" {
 		return mountOpts
