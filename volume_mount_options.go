@@ -9,7 +9,11 @@ import (
 type MountOpts map[string]interface{}
 
 func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpts, error) {
-	mountOpts := mask.Defaults
+	mountOpts := make(map[string]interface{})
+	for k, v := range mask.Defaults {
+		mountOpts[k] = v
+	}
+
 	errorList := []string{}
 
 	for k, v := range userOpts {

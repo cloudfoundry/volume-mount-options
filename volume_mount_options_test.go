@@ -92,10 +92,26 @@ var _ = Describe("VolumeMountOptions", func() {
 				Expect(mask.SloppyMount).To(BeFalse())
 			})
 
-			Context("when there isnt any user input", func() {
+			It("should not mutate the mask", func() {
+				m, err := vmo.NewMountOptsMask(
+					[]string{"opt1", "opt2", "opt3"},
+					map[string]interface{}{
+						"opt2": "default2",
+						"opt3": "default3",
+					},
+					map[string]string{},
+					[]string{},
+					[]string{},
+				)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(mask).To(Equal(m))
+			})
+
+			Context("when there isn't any user input", func() {
 				BeforeEach(func() {
 					userInput = map[string]interface{}{}
 				})
+
 				It("should return the default options", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(actualRes).To(Equal(vmo.MountOpts(defaultOpts)))
