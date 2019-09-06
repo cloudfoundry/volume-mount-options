@@ -15,6 +15,8 @@ func ToKernelMountOptionString(mountOpts map[string]interface{}) string {
 		case string:
 			if val, err := strconv.ParseInt(v.(string), 10, 16); err == nil {
 				paramList = append(paramList, fmt.Sprintf("%s=%d", k, val))
+			} else if strings.ToLower(k) == "domain" && v == "" {
+				continue
 			} else if v == "" {
 				paramList = append(paramList, k)
 			} else {

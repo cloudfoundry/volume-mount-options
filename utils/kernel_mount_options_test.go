@@ -75,8 +75,59 @@ var _ = Describe("KernelMountOptions", func() {
 				}
 			})
 
-			It("adds the mount option to the string without a value", func() {
-				Expect(kernelMountOptions).To(Equal("does-not-matter"))
+			It("contains the mount option", func() {
+				Expect(kernelMountOptions).To(ContainSubstring("does-not-matter"))
+			})
+		})
+
+		Context("given a mount option with nil value", func() {
+			BeforeEach(func() {
+				mountOpts = map[string]interface{}{
+					"does-not-matter": nil,
+				}
+			})
+
+			It("omits the mount option", func() {
+				Expect(kernelMountOptions).NotTo(ContainSubstring("does-not-matter"))
+			})
+		})
+
+
+		Context("given a 'Domain' mount option with no value", func() {
+			BeforeEach(func() {
+				mountOpts = map[string]interface{}{
+					"domain": "",
+					"Domain": "",
+				}
+			})
+
+			It("omits the mount option", func() {
+				Expect(kernelMountOptions).NotTo(ContainSubstring("domain"))
+				Expect(kernelMountOptions).NotTo(ContainSubstring("Domain"))
+			})
+		})
+
+		Context("given a 'Domain' mount option with nil value", func() {
+			BeforeEach(func() {
+				mountOpts = map[string]interface{}{
+					"domain": nil,
+				}
+			})
+
+			It("omits the mount option", func() {
+				Expect(kernelMountOptions).NotTo(ContainSubstring("domain"))
+			})
+		})
+
+		Context("given a readonly mount option with a string boolean value", func() {
+			BeforeEach(func() {
+				mountOpts = map[string]interface{}{
+					"ro": "true",
+				}
+			})
+
+			It("includes the mount option", func() {
+				Expect(kernelMountOptions).To(ContainSubstring("ro"))
 			})
 		})
 	})
