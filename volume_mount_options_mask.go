@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"code.cloudfoundry.org/volume-mount-options/utils"
-	werror "github.com/pkg/errors"
+	"github.com/pkg/errors"
 )
 
 type MountOptsMask struct {
@@ -46,7 +46,7 @@ func NewMountOptsMask(allowed []string, defaults map[string]interface{}, keyPerm
 		mask.SloppyMount, err = strconv.ParseBool(vc)
 
 		if err != nil {
-			return MountOptsMask{}, werror.Wrap(err, "Invalid sloppy_mount option")
+			return MountOptsMask{}, errors.Wrap(err, "Invalid sloppy_mount option")
 		}
 	}
 
