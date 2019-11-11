@@ -81,7 +81,7 @@ var _ = Describe("VolumeMountOptions", func() {
 
 					It("should fail with a meaningful validation error", func() {
 						Expect(err).Should(HaveOccurred())
-						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s", errorMessage1)))
+						Expect(err).To(MatchError(fmt.Sprintf("- validation mount options failed: %s\n", errorMessage1)))
 					})
 				})
 
@@ -95,7 +95,7 @@ var _ = Describe("VolumeMountOptions", func() {
 
 					It("should fail with multiple validation errors", func() {
 						Expect(err).Should(HaveOccurred())
-						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s, %s", errorMessage1, errorMessage2)))
+						Expect(err).To(MatchError(fmt.Sprintf("- validation mount options failed: %s, %s\n", errorMessage1, errorMessage2)))
 					})
 				})
 
@@ -294,7 +294,7 @@ var _ = Describe("VolumeMountOptions", func() {
 				})
 
 				It("should return an error", func() {
-					Expect(err.Error()).To(Equal("Not allowed options: something"))
+					Expect(err.Error()).To(Equal("- Not allowed options: something\n"))
 				})
 			})
 		})
@@ -342,6 +342,27 @@ var _ = Describe("VolumeMountOptions", func() {
 					Expect(err.Error()).To(ContainSubstring("required3"))
 					Expect(err.Error()).To(ContainSubstring("required2"))
 				})
+			})
+		})
+
+		Context("when disallowed options, missing mandatory, and failed validations", func(){
+			BeforeEach(func(){
+				validationFunc.ValidateReturns(errors.New("validation error"))
+				allowedOpts = []string{"opt1"}
+				userInput = map[string]interface{}{
+					"opt1": "val1",
+					"notallowed": "foo",
+				}
+				mandatoryOpts = []string{"required1"}
+			})
+
+			It("returns a list of all errors", func(){
+				Expect(actualRes).To(Equal(vmo.MountOpts{}))
+				Expect(err).To(MatchError(
+					`- validation mount options failed: validation error
+- Not allowed options: notallowed
+- Missing mandatory options: required1
+`))
 			})
 		})
 
