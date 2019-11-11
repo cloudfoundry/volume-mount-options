@@ -28,7 +28,7 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 		})
 
 		JustBeforeEach(func() {
-			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts)
+			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, nil)
 		})
 
 		Context("when given a set of allowed options", func() {

@@ -2,7 +2,10 @@ package volume_mount_options_test
 
 import (
 	vmo "code.cloudfoundry.org/volume-mount-options"
+	"code.cloudfoundry.org/volume-mount-options/volume-mount-optionsfakes"
+	"github.com/pkg/errors"
 
+	"github.com/google/gofuzz"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -18,8 +21,9 @@ var _ = Describe("VolumeMountOptions", func() {
 			actualRes     vmo.MountOpts
 			err           error
 
-			userInput map[string]interface{}
-			mask      vmo.MountOptsMask
+			userInput      map[string]interface{}
+			mask           vmo.MountOptsMask
+			validationFunc vmo.ValidationFuncI
 		)
 
 		BeforeEach(func() {
@@ -30,10 +34,11 @@ var _ = Describe("VolumeMountOptions", func() {
 			mandatoryOpts = []string{}
 
 			userInput = map[string]interface{}{}
+			validationFunc = &volumemountoptionsfakes.FakeValidationFuncI{}
 		})
 
 		JustBeforeEach(func() {
-			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts)
+			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, validationFunc)
 			Expect(err).NotTo(HaveOccurred())
 
 			actualRes, err = vmo.NewMountOpts(userInput, mask)
@@ -55,6 +60,59 @@ var _ = Describe("VolumeMountOptions", func() {
 					"opt1": "val1",
 					"opt2": "val2",
 				}))
+			})
+
+			Context("and given a set of allowed option validations", func() {
+				BeforeEach(func() {
+					validationFunc = vmo.ValidationFunc(func(key string, value string) error {
+						return errors.New("validation error")
+					})
+				})
+
+				It("should fail with a validation error", func() {
+					Expect(err).Should(HaveOccurred())
+				})
+
+				Context("using a fake validation func", func() {
+					var (
+						validationFunc *volumemountoptionsfakes.FakeValidationFuncI
+						key1, key2     string
+						val1, val2     string
+						fuzzer          = fuzz.New()
+					)
+
+					BeforeEach(func() {
+						fuzzer.Fuzz(&key1)
+						fuzzer.Fuzz(&val1)
+						fuzzer.Fuzz(&key2)
+						fuzzer.Fuzz(&val2)
+
+						validationFunc = &volumemountoptionsfakes.FakeValidationFuncI{}
+						userInput = map[string]interface{}{
+							key1: val1,
+							key2: val2,
+						}
+
+						allowedOpts = []string{key1, key2}
+					})
+
+					It("should call the validation func on each user option", func(){
+						mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, validationFunc)
+						Expect(err).NotTo(HaveOccurred())
+
+						actualRes, err = vmo.NewMountOpts(userInput, mask)
+						Expect(err).NotTo(HaveOccurred())
+
+						Expect(validationFunc.ValidateCallCount()).To(Equal(2))
+
+						key, value := validationFunc.ValidateArgsForCall(0)
+						Expect(key + value).To(Or(Equal(key1+val1), Equal(key2+val2)))
+
+						key, value = validationFunc.ValidateArgsForCall(1)
+						Expect(key + value).To(Or(Equal(key1+val1), Equal(key2+val2)))
+					})
+				})
+
 			})
 		})
 
@@ -102,6 +160,7 @@ var _ = Describe("VolumeMountOptions", func() {
 					map[string]string{},
 					[]string{},
 					[]string{},
+					validationFunc,
 				)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(mask).To(Equal(m))
