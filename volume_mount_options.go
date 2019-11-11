@@ -14,15 +14,6 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 		mountOpts[k] = v
 	}
 
-	if mask.ValidationFunc != nil {
-		for key, val := range userOpts {
-			err := mask.ValidationFunc.Validate(key, fmt.Sprintf("%v", val))
-			if err != nil {
-				return MountOpts{}, fmt.Errorf("validation mount options failed: %v", err)
-			}
-		}
-	}
-
 	errorList := []string{}
 
 	for k, v := range userOpts {
@@ -41,6 +32,15 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 			mountOpts[canonicalKey] = uv
 		} else if !mask.SloppyMount {
 			errorList = append(errorList, k)
+		}
+	}
+
+	if mask.ValidationFunc != nil {
+		for key, val := range mountOpts {
+			err := mask.ValidationFunc.Validate(key, fmt.Sprintf("%v", val))
+			if err != nil {
+				return MountOpts{}, fmt.Errorf("validation mount options failed: %v", err)
+			}
 		}
 	}
 

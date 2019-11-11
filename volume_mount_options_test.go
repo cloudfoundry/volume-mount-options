@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/google/gofuzz"
 	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
@@ -78,6 +79,30 @@ var _ = Describe("VolumeMountOptions", func() {
 						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s", errorMessage)))
 					})
 				})
+
+				table.DescribeTable("with non string user options", func(userValue interface{}) {
+					validationFunc = &volumemountoptionsfakes.FakeValidationFuncI{}
+					userInput = map[string]interface{}{
+						"opt1": userValue,
+					}
+
+					mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, validationFunc)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualRes, err = vmo.NewMountOpts(userInput, mask)
+
+					Expect(err).NotTo(HaveOccurred())
+					expectedKey, expectedVal := validationFunc.ValidateArgsForCall(0)
+					Expect(expectedKey).To(Equal("opt1"))
+					Expect(expectedVal).To(Equal(actualRes["opt1"]))
+				},
+				table.Entry("integer", 1),
+				table.Entry("floating number", 1.0),
+				table.Entry("null", nil),
+				table.Entry("true", true),
+				table.Entry("false", false),
+				)
+
 
 				Context("using a fake validation func", func() {
 					var (
