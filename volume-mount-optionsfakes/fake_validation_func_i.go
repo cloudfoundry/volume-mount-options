@@ -4,7 +4,7 @@ package volumemountoptionsfakes
 import (
 	"sync"
 
-	volume_mount_options "code.cloudfoundry.org/volume-mount-options"
+	volume_mount_options "code.cloudfoundry.org/volume-mount-options/v2"
 )
 
 type FakeValidationFuncI struct {

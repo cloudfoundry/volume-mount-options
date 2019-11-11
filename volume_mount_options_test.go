@@ -1,8 +1,8 @@
 package volume_mount_options_test
 
 import (
-	vmo "code.cloudfoundry.org/volume-mount-options"
-	"code.cloudfoundry.org/volume-mount-options/volume-mount-optionsfakes"
+	vmo "code.cloudfoundry.org/volume-mount-options/v2"
+	"code.cloudfoundry.org/volume-mount-options/v2/volume-mount-optionsfakes"
 	"errors"
 	"fmt"
 	"github.com/google/gofuzz"
