@@ -65,18 +65,37 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			Context("and given a set of allowed option validations", func() {
 				var (
-					errorMessage string
+					errorMessage1 string
+					errorMessage2 string
 				)
 
 				Context("when validation check fails", func() {
 					BeforeEach(func() {
-						fuzz.New().Fuzz(&errorMessage)
-						validationFunc.ValidateReturns(errors.New(errorMessage))
+						userInput = map[string]interface{}{
+							"opt1": "val1",
+						}
+
+						fuzz.New().Fuzz(&errorMessage1)
+						validationFunc.ValidateReturns(errors.New(errorMessage1))
 					})
 
 					It("should fail with a meaningful validation error", func() {
 						Expect(err).Should(HaveOccurred())
-						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s", errorMessage)))
+						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s", errorMessage1)))
+					})
+				})
+
+				Context("when multiple validation checks fails", func() {
+					BeforeEach(func() {
+						fuzz.New().Fuzz(&errorMessage1)
+						fuzz.New().Fuzz(&errorMessage2)
+						validationFunc.ValidateReturnsOnCall(0, errors.New(errorMessage1))
+						validationFunc.ValidateReturnsOnCall(1, errors.New(errorMessage2))
+					})
+
+					It("should fail with multiple validation errors", func() {
+						Expect(err).Should(HaveOccurred())
+						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s, %s", errorMessage1, errorMessage2)))
 					})
 				})
 
