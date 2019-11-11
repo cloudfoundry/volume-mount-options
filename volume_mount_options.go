@@ -18,7 +18,7 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 		for key, val := range userOpts {
 			err := mask.ValidationFunc.Validate(key, fmt.Sprintf("%v", val))
 			if err != nil {
-				return MountOpts{}, fmt.Errorf("failed validation error")
+				return MountOpts{}, fmt.Errorf("validation mount options failed: %v", err)
 			}
 		}
 	}

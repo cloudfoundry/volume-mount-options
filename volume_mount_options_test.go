@@ -3,8 +3,8 @@ package volume_mount_options_test
 import (
 	vmo "code.cloudfoundry.org/volume-mount-options"
 	"code.cloudfoundry.org/volume-mount-options/volume-mount-optionsfakes"
-	"github.com/pkg/errors"
-
+	"errors"
+	"fmt"
 	"github.com/google/gofuzz"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -23,7 +23,7 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			userInput      map[string]interface{}
 			mask           vmo.MountOptsMask
-			validationFunc vmo.ValidationFuncI
+			validationFunc *volumemountoptionsfakes.FakeValidationFuncI
 		)
 
 		BeforeEach(func() {
@@ -63,19 +63,24 @@ var _ = Describe("VolumeMountOptions", func() {
 			})
 
 			Context("and given a set of allowed option validations", func() {
-				BeforeEach(func() {
-					validationFunc = vmo.ValidationFunc(func(key string, value string) error {
-						return errors.New("validation error")
-					})
-				})
+				var (
+					errorMessage string
+				)
 
-				It("should fail with a validation error", func() {
-					Expect(err).Should(HaveOccurred())
+				Context("when validation check fails", func() {
+					BeforeEach(func() {
+						fuzz.New().Fuzz(&errorMessage)
+						validationFunc.ValidateReturns(errors.New(errorMessage))
+					})
+
+					It("should fail with a meaningful validation error", func() {
+						Expect(err).Should(HaveOccurred())
+						Expect(err).To(MatchError(fmt.Sprintf("validation mount options failed: %s", errorMessage)))
+					})
 				})
 
 				Context("using a fake validation func", func() {
 					var (
-						validationFunc *volumemountoptionsfakes.FakeValidationFuncI
 						key1, key2     string
 						val1, val2     string
 						fuzzer          = fuzz.New()
@@ -87,7 +92,6 @@ var _ = Describe("VolumeMountOptions", func() {
 						fuzzer.Fuzz(&key2)
 						fuzzer.Fuzz(&val2)
 
-						validationFunc = &volumemountoptionsfakes.FakeValidationFuncI{}
 						userInput = map[string]interface{}{
 							key1: val1,
 							key2: val2,
@@ -97,12 +101,7 @@ var _ = Describe("VolumeMountOptions", func() {
 					})
 
 					It("should call the validation func on each user option", func(){
-						mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, validationFunc)
 						Expect(err).NotTo(HaveOccurred())
-
-						actualRes, err = vmo.NewMountOpts(userInput, mask)
-						Expect(err).NotTo(HaveOccurred())
-
 						Expect(validationFunc.ValidateCallCount()).To(Equal(2))
 
 						key, value := validationFunc.ValidateArgsForCall(0)
