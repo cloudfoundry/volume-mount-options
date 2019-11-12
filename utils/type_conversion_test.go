@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"code.cloudfoundry.org/volume-mount-options/v2/utils"
+	"code.cloudfoundry.org/volume-mount-options/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"

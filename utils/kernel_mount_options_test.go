@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"code.cloudfoundry.org/volume-mount-options/v2/utils"
+	"code.cloudfoundry.org/volume-mount-options/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

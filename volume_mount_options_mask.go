@@ -3,7 +3,7 @@ package volume_mount_options
 import (
 	"strconv"
 
-	"code.cloudfoundry.org/volume-mount-options/v2/utils"
+	"code.cloudfoundry.org/volume-mount-options/utils"
 	"github.com/pkg/errors"
 )
 
