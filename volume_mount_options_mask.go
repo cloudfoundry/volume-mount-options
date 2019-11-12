@@ -8,25 +8,15 @@ import (
 )
 
 type MountOptsMask struct {
-	// set of options that are allowed to be provided by the user
 	Allowed []string
-
-	// set of default values that will be used if not otherwise provided
 	Defaults map[string]interface{}
-
-	// set of key permutations
 	KeyPerms map[string]string
-
-	// set of options that, if provided,  will be silently ignored
 	Ignored []string
-
-	// set of options that must be provided
 	Mandatory []string
-
 	SloppyMount bool
-
 	ValidationFunc []UserOptsValidation
 }
+
 //go:generate counterfeiter . UserOptsValidation
 type UserOptsValidation interface {
 	Validate(string, string) error
