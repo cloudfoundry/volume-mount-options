@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
-	"strings"
 )
 
 var _ = Describe("VolumeMountOptions", func() {
@@ -133,14 +132,13 @@ var _ = Describe("VolumeMountOptions", func() {
 					var (
 						key1, key2 string
 						val1, val2 string
-						fuzzer     = fuzz.New().NilChance(0)
 					)
 
 					BeforeEach(func() {
-						fuzzer.Fuzz(&key1)
-						fuzzer.Fuzz(&val1)
-						fuzzer.Fuzz(&key2)
-						fuzzer.Fuzz(&val2)
+						key1 = "key1"
+						key2 = "key2"
+						val1 = "val1"
+						val2 = "val2"
 
 						userInput = map[string]interface{}{
 							key1: val1,
@@ -155,10 +153,10 @@ var _ = Describe("VolumeMountOptions", func() {
 						Expect(fakeValidationFuncI.ValidateCallCount()).To(Equal(2))
 
 						key, value := fakeValidationFuncI.ValidateArgsForCall(0)
-						Expect(key + value).To(Or(Equal(key1+sanitizeValue(val1)), Equal(key2+sanitizeValue(val2))))
+						Expect(key + value).To(Or(Equal(key1+val1), Equal(key2+val2)))
 
 						key, value = fakeValidationFuncI.ValidateArgsForCall(1)
-						Expect(key + value).To(Or(Equal(key1+sanitizeValue(val1)), Equal(key2+sanitizeValue(val2))))
+						Expect(key + value).To(Or(Equal(key1+val1), Equal(key2+val2)))
 					})
 				})
 
@@ -193,10 +191,10 @@ var _ = Describe("VolumeMountOptions", func() {
 						Expect(validationFuncs2.ValidateCallCount()).To(Equal(1))
 
 						key, value := validationFuncs1.ValidateArgsForCall(0)
-						Expect(key + value).To(Equal(key1 + sanitizeValue(val1)))
+						Expect(key + value).To(Equal(key1 + val1))
 
 						key, value = validationFuncs2.ValidateArgsForCall(0)
-						Expect(key + value).To(Equal(key1 + sanitizeValue(val1)))
+						Expect(key + value).To(Equal(key1 + val1))
 					})
 				})
 
@@ -474,7 +472,3 @@ var _ = Describe("VolumeMountOptions", func() {
 		})
 	})
 })
-
-func sanitizeValue(val string) string {
-	return strings.ReplaceAll(val, "%", "%%")
-}
