@@ -15,17 +15,17 @@ import (
 var _ = Describe("VolumeMountOptions", func() {
 	Describe("#NewMountOpts", func() {
 		var (
-			allowedOpts   []string
-			defaultOpts   map[string]interface{}
-			ignoredOpts   []string
-			keyPerms      map[string]string
-			mandatoryOpts []string
-			actualRes     vmo.MountOpts
-			err           error
-
-			userInput      map[string]interface{}
-			mask           vmo.MountOptsMask
-			validationFunc *volumemountoptionsfakes.FakeValidationFuncI
+			allowedOpts         []string
+			defaultOpts         map[string]interface{}
+			ignoredOpts         []string
+			keyPerms            map[string]string
+			mandatoryOpts       []string
+			actualRes           vmo.MountOpts
+			err                 error
+			userInput           map[string]interface{}
+			mask                vmo.MountOptsMask
+			validationFuncs     []vmo.ValidationFuncI
+			fakeValidationFuncI *volumemountoptionsfakes.FakeValidationFuncI
 		)
 
 		BeforeEach(func() {
@@ -36,11 +36,20 @@ var _ = Describe("VolumeMountOptions", func() {
 			mandatoryOpts = []string{}
 
 			userInput = map[string]interface{}{}
-			validationFunc = &volumemountoptionsfakes.FakeValidationFuncI{}
+
+			fakeValidationFuncI = &volumemountoptionsfakes.FakeValidationFuncI{}
+			validationFuncs = []vmo.ValidationFuncI {
+				fakeValidationFuncI,
+			}
 		})
 
 		JustBeforeEach(func() {
-			mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, validationFunc)
+			mask, err = vmo.NewMountOptsMask(allowedOpts,
+				defaultOpts,
+				keyPerms,
+				ignoredOpts,
+				mandatoryOpts,
+				validationFuncs...)
 			Expect(err).NotTo(HaveOccurred())
 
 			actualRes, err = vmo.NewMountOpts(userInput, mask)
@@ -76,7 +85,7 @@ var _ = Describe("VolumeMountOptions", func() {
 							"opt1": "val1",
 						}
 
-						validationFunc.ValidateReturns(errors.New(errorMessage1))
+						fakeValidationFuncI.ValidateReturns(errors.New(errorMessage1))
 					})
 
 					It("should fail with a meaningful validation error", func() {
@@ -87,8 +96,8 @@ var _ = Describe("VolumeMountOptions", func() {
 
 				Context("when multiple validation checks fails", func() {
 					BeforeEach(func() {
-						validationFunc.ValidateReturnsOnCall(0, errors.New(errorMessage1))
-						validationFunc.ValidateReturnsOnCall(1, errors.New(errorMessage2))
+						fakeValidationFuncI.ValidateReturnsOnCall(0, errors.New(errorMessage1))
+						fakeValidationFuncI.ValidateReturnsOnCall(1, errors.New(errorMessage2))
 					})
 
 					It("should fail with multiple validation errors", func() {
@@ -98,18 +107,18 @@ var _ = Describe("VolumeMountOptions", func() {
 				})
 
 				table.DescribeTable("with non string user options", func(userValue interface{}) {
-					validationFunc = &volumemountoptionsfakes.FakeValidationFuncI{}
+					fakeValidationFuncI = &volumemountoptionsfakes.FakeValidationFuncI{}
 					userInput = map[string]interface{}{
 						"opt1": userValue,
 					}
 
-					mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, validationFunc)
+					mask, err = vmo.NewMountOptsMask(allowedOpts, defaultOpts, keyPerms, ignoredOpts, mandatoryOpts, fakeValidationFuncI)
 					Expect(err).NotTo(HaveOccurred())
 
 					actualRes, err = vmo.NewMountOpts(userInput, mask)
 
 					Expect(err).NotTo(HaveOccurred())
-					expectedKey, expectedVal := validationFunc.ValidateArgsForCall(0)
+					expectedKey, expectedVal := fakeValidationFuncI.ValidateArgsForCall(0)
 					Expect(expectedKey).To(Equal("opt1"))
 					Expect(expectedVal).To(Equal(actualRes["opt1"]))
 				},
@@ -144,13 +153,51 @@ var _ = Describe("VolumeMountOptions", func() {
 
 					It("should call the validation func on each user option", func(){
 						Expect(err).NotTo(HaveOccurred())
-						Expect(validationFunc.ValidateCallCount()).To(Equal(2))
+						Expect(fakeValidationFuncI.ValidateCallCount()).To(Equal(2))
 
-						key, value := validationFunc.ValidateArgsForCall(0)
+						key, value := fakeValidationFuncI.ValidateArgsForCall(0)
 						Expect(key + value).To(Or(Equal(key1+sanitizeValue(val1)), Equal(key2+sanitizeValue(val2))))
 
-						key, value = validationFunc.ValidateArgsForCall(1)
+						key, value = fakeValidationFuncI.ValidateArgsForCall(1)
 						Expect(key + value).To(Or(Equal(key1+sanitizeValue(val1)), Equal(key2+sanitizeValue(val2))))
+					})
+				})
+
+				Context("with multiple validation funcs", func() {
+					var (
+						key1, val1     string
+						fuzzer          = fuzz.New().NilChance(0)
+						validationFuncs1, validationFuncs2 *volumemountoptionsfakes.FakeValidationFuncI
+					)
+
+					BeforeEach(func() {
+						fuzzer.Fuzz(&key1)
+						fuzzer.Fuzz(&val1)
+
+						userInput = map[string]interface{}{
+							key1: val1,
+						}
+
+						allowedOpts = []string{key1}
+
+						validationFuncs1 = &volumemountoptionsfakes.FakeValidationFuncI{}
+						validationFuncs2 = &volumemountoptionsfakes.FakeValidationFuncI{}
+						validationFuncs = []vmo.ValidationFuncI {
+							validationFuncs1,
+							validationFuncs2,
+						}
+					})
+
+					It("should call each validation func on each user option", func(){
+						Expect(err).NotTo(HaveOccurred())
+						Expect(validationFuncs1.ValidateCallCount()).To(Equal(1))
+						Expect(validationFuncs2.ValidateCallCount()).To(Equal(1))
+
+						key, value := validationFuncs1.ValidateArgsForCall(0)
+						Expect(key + value).To(Equal(key1+sanitizeValue(val1)))
+
+						key, value = validationFuncs2.ValidateArgsForCall(0)
+						Expect(key + value).To(Equal(key1+sanitizeValue(val1)))
 					})
 				})
 
@@ -201,7 +248,7 @@ var _ = Describe("VolumeMountOptions", func() {
 					map[string]string{},
 					[]string{},
 					[]string{},
-					validationFunc,
+					validationFuncs...,
 				)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(mask).To(Equal(m))
@@ -345,7 +392,7 @@ var _ = Describe("VolumeMountOptions", func() {
 
 		Context("when disallowed options, missing mandatory, and failed validations", func() {
 			BeforeEach(func() {
-				validationFunc.ValidateReturns(errors.New("validation error"))
+				fakeValidationFuncI.ValidateReturns(errors.New("validation error"))
 				allowedOpts = []string{"opt1"}
 				userInput = map[string]interface{}{
 					"opt1":       "val1",
