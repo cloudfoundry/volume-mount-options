@@ -24,8 +24,8 @@ var _ = Describe("VolumeMountOptions", func() {
 			err                 error
 			userInput           map[string]interface{}
 			mask                vmo.MountOptsMask
-			validationFuncs     []vmo.ValidationFuncI
-			fakeValidationFuncI *volumemountoptionsfakes.FakeValidationFuncI
+			validationFuncs     []vmo.UserOptsValidation
+			fakeValidationFuncI *volumemountoptionsfakes.FakeUserOptsValidation
 		)
 
 		BeforeEach(func() {
@@ -37,8 +37,8 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			userInput = map[string]interface{}{}
 
-			fakeValidationFuncI = &volumemountoptionsfakes.FakeValidationFuncI{}
-			validationFuncs = []vmo.ValidationFuncI {
+			fakeValidationFuncI = &volumemountoptionsfakes.FakeUserOptsValidation{}
+			validationFuncs = []vmo.UserOptsValidation{
 				fakeValidationFuncI,
 			}
 		})
@@ -107,7 +107,7 @@ var _ = Describe("VolumeMountOptions", func() {
 				})
 
 				table.DescribeTable("with non string user options", func(userValue interface{}) {
-					fakeValidationFuncI = &volumemountoptionsfakes.FakeValidationFuncI{}
+					fakeValidationFuncI = &volumemountoptionsfakes.FakeUserOptsValidation{}
 					userInput = map[string]interface{}{
 						"opt1": userValue,
 					}
@@ -167,7 +167,7 @@ var _ = Describe("VolumeMountOptions", func() {
 					var (
 						key1, val1     string
 						fuzzer          = fuzz.New().NilChance(0)
-						validationFuncs1, validationFuncs2 *volumemountoptionsfakes.FakeValidationFuncI
+						validationFuncs1, validationFuncs2 *volumemountoptionsfakes.FakeUserOptsValidation
 					)
 
 					BeforeEach(func() {
@@ -180,9 +180,9 @@ var _ = Describe("VolumeMountOptions", func() {
 
 						allowedOpts = []string{key1}
 
-						validationFuncs1 = &volumemountoptionsfakes.FakeValidationFuncI{}
-						validationFuncs2 = &volumemountoptionsfakes.FakeValidationFuncI{}
-						validationFuncs = []vmo.ValidationFuncI {
+						validationFuncs1 = &volumemountoptionsfakes.FakeUserOptsValidation{}
+						validationFuncs2 = &volumemountoptionsfakes.FakeUserOptsValidation{}
+						validationFuncs = []vmo.UserOptsValidation{
 							validationFuncs1,
 							validationFuncs2,
 						}

@@ -7,7 +7,7 @@ import (
 	volume_mount_options "code.cloudfoundry.org/volume-mount-options"
 )
 
-type FakeValidationFuncI struct {
+type FakeUserOptsValidation struct {
 	ValidateStub        func(string, string) error
 	validateMutex       sync.RWMutex
 	validateArgsForCall []struct {
@@ -24,7 +24,7 @@ type FakeValidationFuncI struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeValidationFuncI) Validate(arg1 string, arg2 string) error {
+func (fake *FakeUserOptsValidation) Validate(arg1 string, arg2 string) error {
 	fake.validateMutex.Lock()
 	ret, specificReturn := fake.validateReturnsOnCall[len(fake.validateArgsForCall)]
 	fake.validateArgsForCall = append(fake.validateArgsForCall, struct {
@@ -43,26 +43,26 @@ func (fake *FakeValidationFuncI) Validate(arg1 string, arg2 string) error {
 	return fakeReturns.result1
 }
 
-func (fake *FakeValidationFuncI) ValidateCallCount() int {
+func (fake *FakeUserOptsValidation) ValidateCallCount() int {
 	fake.validateMutex.RLock()
 	defer fake.validateMutex.RUnlock()
 	return len(fake.validateArgsForCall)
 }
 
-func (fake *FakeValidationFuncI) ValidateCalls(stub func(string, string) error) {
+func (fake *FakeUserOptsValidation) ValidateCalls(stub func(string, string) error) {
 	fake.validateMutex.Lock()
 	defer fake.validateMutex.Unlock()
 	fake.ValidateStub = stub
 }
 
-func (fake *FakeValidationFuncI) ValidateArgsForCall(i int) (string, string) {
+func (fake *FakeUserOptsValidation) ValidateArgsForCall(i int) (string, string) {
 	fake.validateMutex.RLock()
 	defer fake.validateMutex.RUnlock()
 	argsForCall := fake.validateArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeValidationFuncI) ValidateReturns(result1 error) {
+func (fake *FakeUserOptsValidation) ValidateReturns(result1 error) {
 	fake.validateMutex.Lock()
 	defer fake.validateMutex.Unlock()
 	fake.ValidateStub = nil
@@ -71,7 +71,7 @@ func (fake *FakeValidationFuncI) ValidateReturns(result1 error) {
 	}{result1}
 }
 
-func (fake *FakeValidationFuncI) ValidateReturnsOnCall(i int, result1 error) {
+func (fake *FakeUserOptsValidation) ValidateReturnsOnCall(i int, result1 error) {
 	fake.validateMutex.Lock()
 	defer fake.validateMutex.Unlock()
 	fake.ValidateStub = nil
@@ -85,7 +85,7 @@ func (fake *FakeValidationFuncI) ValidateReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeValidationFuncI) Invocations() map[string][][]interface{} {
+func (fake *FakeUserOptsValidation) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.validateMutex.RLock()
@@ -97,7 +97,7 @@ func (fake *FakeValidationFuncI) Invocations() map[string][][]interface{} {
 	return copiedInvocations
 }
 
-func (fake *FakeValidationFuncI) recordInvocation(key string, args []interface{}) {
+func (fake *FakeUserOptsValidation) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -109,4 +109,4 @@ func (fake *FakeValidationFuncI) recordInvocation(key string, args []interface{}
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ volume_mount_options.ValidationFuncI = new(FakeValidationFuncI)
+var _ volume_mount_options.UserOptsValidation = new(FakeUserOptsValidation)
