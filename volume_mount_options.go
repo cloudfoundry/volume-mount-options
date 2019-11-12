@@ -32,7 +32,7 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 
 		if inArray(mask.Allowed, canonicalKey) {
 			uv := uniformKeyData(canonicalKey, v)
-			mountOpts[canonicalKey] = strings.ReplaceAll(uv,"%", "%%")
+			mountOpts[canonicalKey] = strings.ReplaceAll(uv, "%", "%%")
 		} else if !mask.SloppyMount {
 			allowedErrorList = append(allowedErrorList, k)
 		}

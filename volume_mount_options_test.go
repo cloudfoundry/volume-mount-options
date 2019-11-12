@@ -122,19 +122,18 @@ var _ = Describe("VolumeMountOptions", func() {
 					Expect(expectedKey).To(Equal("opt1"))
 					Expect(expectedVal).To(Equal(actualRes["opt1"]))
 				},
-				table.Entry("integer", 1),
-				table.Entry("floating number", 1.0),
-				table.Entry("null", nil),
-				table.Entry("true", true),
-				table.Entry("false", false),
+					table.Entry("integer", 1),
+					table.Entry("floating number", 1.0),
+					table.Entry("null", nil),
+					table.Entry("true", true),
+					table.Entry("false", false),
 				)
-
 
 				Context("using a fake validation func", func() {
 					var (
-						key1, key2     string
-						val1, val2     string
-						fuzzer          = fuzz.New().NilChance(0)
+						key1, key2 string
+						val1, val2 string
+						fuzzer     = fuzz.New().NilChance(0)
 					)
 
 					BeforeEach(func() {
@@ -151,7 +150,7 @@ var _ = Describe("VolumeMountOptions", func() {
 						allowedOpts = []string{key1, key2}
 					})
 
-					It("should call the validation func on each user option", func(){
+					It("should call the validation func on each user option", func() {
 						Expect(err).NotTo(HaveOccurred())
 						Expect(fakeValidationFuncI.ValidateCallCount()).To(Equal(2))
 
@@ -165,8 +164,8 @@ var _ = Describe("VolumeMountOptions", func() {
 
 				Context("with multiple validation funcs", func() {
 					var (
-						key1, val1     string
-						fuzzer          = fuzz.New().NilChance(0)
+						key1, val1                         string
+						fuzzer                             = fuzz.New().NilChance(0)
 						validationFuncs1, validationFuncs2 *volumemountoptionsfakes.FakeUserOptsValidation
 					)
 
@@ -188,16 +187,16 @@ var _ = Describe("VolumeMountOptions", func() {
 						}
 					})
 
-					It("should call each validation func on each user option", func(){
+					It("should call each validation func on each user option", func() {
 						Expect(err).NotTo(HaveOccurred())
 						Expect(validationFuncs1.ValidateCallCount()).To(Equal(1))
 						Expect(validationFuncs2.ValidateCallCount()).To(Equal(1))
 
 						key, value := validationFuncs1.ValidateArgsForCall(0)
-						Expect(key + value).To(Equal(key1+sanitizeValue(val1)))
+						Expect(key + value).To(Equal(key1 + sanitizeValue(val1)))
 
 						key, value = validationFuncs2.ValidateArgsForCall(0)
-						Expect(key + value).To(Equal(key1+sanitizeValue(val1)))
+						Expect(key + value).To(Equal(key1 + sanitizeValue(val1)))
 					})
 				})
 

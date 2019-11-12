@@ -92,7 +92,6 @@ var _ = Describe("KernelMountOptions", func() {
 			})
 		})
 
-
 		Context("given a 'Domain' mount option with no value", func() {
 			BeforeEach(func() {
 				mountOpts = map[string]interface{}{

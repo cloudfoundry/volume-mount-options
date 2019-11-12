@@ -8,12 +8,12 @@ import (
 )
 
 type MountOptsMask struct {
-	Allowed []string
-	Defaults map[string]interface{}
-	KeyPerms map[string]string
-	Ignored []string
-	Mandatory []string
-	SloppyMount bool
+	Allowed        []string
+	Defaults       map[string]interface{}
+	KeyPerms       map[string]string
+	Ignored        []string
+	Mandatory      []string
+	SloppyMount    bool
 	ValidationFunc []UserOptsValidation
 }
 
@@ -34,11 +34,11 @@ func NewMountOptsMask(allowed []string,
 	ignored, mandatory []string,
 	f ...UserOptsValidation) (MountOptsMask, error) {
 	mask := MountOptsMask{
-		Allowed:   allowed,
-		Defaults:  defaults,
-		KeyPerms:  keyPerms,
-		Ignored:   ignored,
-		Mandatory: mandatory,
+		Allowed:        allowed,
+		Defaults:       defaults,
+		KeyPerms:       keyPerms,
+		Ignored:        ignored,
+		Mandatory:      mandatory,
 		ValidationFunc: f,
 	}
 
