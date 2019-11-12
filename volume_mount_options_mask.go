@@ -25,7 +25,7 @@ type MountOptsMask struct {
 
 	SloppyMount bool
 
-	ValidationFunc ValidationFuncI
+	ValidationFunc []ValidationFuncI
 }
 //go:generate counterfeiter . ValidationFuncI
 type ValidationFuncI interface {
@@ -38,7 +38,11 @@ func (v ValidationFunc) Validate(a string, b string) error {
 	return v(a, b)
 }
 
-func NewMountOptsMask(allowed []string, defaults map[string]interface{}, keyPerms map[string]string, ignored, mandatory []string, f ValidationFuncI) (MountOptsMask, error) {
+func NewMountOptsMask(allowed []string,
+	defaults map[string]interface{},
+	keyPerms map[string]string,
+	ignored, mandatory []string,
+	f ...ValidationFuncI) (MountOptsMask, error) {
 	mask := MountOptsMask{
 		Allowed:   allowed,
 		Defaults:  defaults,

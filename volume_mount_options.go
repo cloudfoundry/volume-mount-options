@@ -32,7 +32,7 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 
 		if inArray(mask.Allowed, canonicalKey) {
 			uv := uniformKeyData(canonicalKey, v)
-			mountOpts[canonicalKey] = uv
+			mountOpts[canonicalKey] = strings.ReplaceAll(uv,"%", "%%")
 		} else if !mask.SloppyMount {
 			allowedErrorList = append(allowedErrorList, k)
 		}
@@ -41,7 +41,7 @@ func NewMountOpts(userOpts map[string]interface{}, mask MountOptsMask) (MountOpt
 	var validationErrorList []string
 	if mask.ValidationFunc != nil {
 		for key, val := range mountOpts {
-			err := mask.ValidationFunc.Validate(key, fmt.Sprintf("%v", val))
+			err := mask.ValidationFunc[0].Validate(key, fmt.Sprintf("%v", val))
 			if err != nil {
 				validationErrorList = append(validationErrorList, err.Error())
 			}

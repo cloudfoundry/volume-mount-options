@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+	"strings"
 )
 
 var _ = Describe("VolumeMountOptions", func() {
@@ -65,8 +66,8 @@ var _ = Describe("VolumeMountOptions", func() {
 
 			Context("and given a set of allowed option validations", func() {
 				var (
-					errorMessage1 string
-					errorMessage2 string
+					errorMessage1 = "errorMessage1"
+					errorMessage2 = "errorMessage2"
 				)
 
 				Context("when validation check fails", func() {
@@ -75,27 +76,24 @@ var _ = Describe("VolumeMountOptions", func() {
 							"opt1": "val1",
 						}
 
-						fuzz.New().Fuzz(&errorMessage1)
 						validationFunc.ValidateReturns(errors.New(errorMessage1))
 					})
 
 					It("should fail with a meaningful validation error", func() {
 						Expect(err).Should(HaveOccurred())
-						Expect(err).To(MatchError(fmt.Sprintf("- validation mount options failed: %s\n", errorMessage1)))
+						Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("- validation mount options failed: %s", errorMessage1)))
 					})
 				})
 
 				Context("when multiple validation checks fails", func() {
 					BeforeEach(func() {
-						fuzz.New().Fuzz(&errorMessage1)
-						fuzz.New().Fuzz(&errorMessage2)
 						validationFunc.ValidateReturnsOnCall(0, errors.New(errorMessage1))
 						validationFunc.ValidateReturnsOnCall(1, errors.New(errorMessage2))
 					})
 
 					It("should fail with multiple validation errors", func() {
 						Expect(err).Should(HaveOccurred())
-						Expect(err).To(MatchError(fmt.Sprintf("- validation mount options failed: %s, %s\n", errorMessage1, errorMessage2)))
+						Expect(err.Error()).To(ContainSubstring(fmt.Sprintf("- validation mount options failed: %s, %s", errorMessage1, errorMessage2)))
 					})
 				})
 
@@ -127,7 +125,7 @@ var _ = Describe("VolumeMountOptions", func() {
 					var (
 						key1, key2     string
 						val1, val2     string
-						fuzzer          = fuzz.New()
+						fuzzer          = fuzz.New().NilChance(0)
 					)
 
 					BeforeEach(func() {
@@ -149,10 +147,10 @@ var _ = Describe("VolumeMountOptions", func() {
 						Expect(validationFunc.ValidateCallCount()).To(Equal(2))
 
 						key, value := validationFunc.ValidateArgsForCall(0)
-						Expect(key + value).To(Or(Equal(key1+val1), Equal(key2+val2)))
+						Expect(key + value).To(Or(Equal(key1+sanitizeValue(val1)), Equal(key2+sanitizeValue(val2))))
 
 						key, value = validationFunc.ValidateArgsForCall(1)
-						Expect(key + value).To(Or(Equal(key1+val1), Equal(key2+val2)))
+						Expect(key + value).To(Or(Equal(key1+sanitizeValue(val1)), Equal(key2+sanitizeValue(val2))))
 					})
 				})
 
@@ -345,18 +343,18 @@ var _ = Describe("VolumeMountOptions", func() {
 			})
 		})
 
-		Context("when disallowed options, missing mandatory, and failed validations", func(){
-			BeforeEach(func(){
+		Context("when disallowed options, missing mandatory, and failed validations", func() {
+			BeforeEach(func() {
 				validationFunc.ValidateReturns(errors.New("validation error"))
 				allowedOpts = []string{"opt1"}
 				userInput = map[string]interface{}{
-					"opt1": "val1",
+					"opt1":       "val1",
 					"notallowed": "foo",
 				}
 				mandatoryOpts = []string{"required1"}
 			})
 
-			It("returns a list of all errors", func(){
+			It("returns a list of all errors", func() {
 				Expect(actualRes).To(Equal(vmo.MountOpts{}))
 				Expect(err).To(MatchError(
 					`- validation mount options failed: validation error
@@ -430,3 +428,7 @@ var _ = Describe("VolumeMountOptions", func() {
 		})
 	})
 })
+
+func sanitizeValue(val string) string {
+	return strings.ReplaceAll(val, "%", "%%")
+}
