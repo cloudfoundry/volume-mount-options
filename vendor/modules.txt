@@ -1,7 +1,8 @@
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
-# github.com/google/gofuzz v1.1.0
+# github.com/google/gofuzz v1.2.0
 github.com/google/gofuzz
+github.com/google/gofuzz/bytesource
 # github.com/nxadm/tail v1.4.4
 github.com/nxadm/tail
 github.com/nxadm/tail/ratelimiter
