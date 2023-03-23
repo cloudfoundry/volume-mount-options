@@ -3,7 +3,7 @@ module code.cloudfoundry.org/volume-mount-options
 require (
 	github.com/google/gofuzz v1.2.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.4
+	github.com/onsi/gomega v1.27.5
 	github.com/pkg/errors v0.9.1
 )
 
@@ -21,4 +21,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.19
+go 1.20
