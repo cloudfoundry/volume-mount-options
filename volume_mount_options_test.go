@@ -1,13 +1,14 @@
 package volume_mount_options_test
 
 import (
-	vmo "code.cloudfoundry.org/volume-mount-options"
-	"code.cloudfoundry.org/volume-mount-options/volume-mount-optionsfakes"
 	"errors"
 	"fmt"
-	"github.com/google/gofuzz"
-	. "github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/extensions/table"
+	"github.com/onsi/ginkgo/v2/dsl/table"
+
+	vmo "code.cloudfoundry.org/volume-mount-options"
+	volumemountoptionsfakes "code.cloudfoundry.org/volume-mount-options/volume-mount-optionsfakes"
+	fuzz "github.com/google/gofuzz"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -121,11 +122,11 @@ var _ = Describe("VolumeMountOptions", func() {
 					Expect(expectedKey).To(Equal("opt1"))
 					Expect(expectedVal).To(Equal(actualRes["opt1"]))
 				},
-					table.Entry("integer", 1),
-					table.Entry("floating number", 1.0),
-					table.Entry("null", nil),
-					table.Entry("true", true),
-					table.Entry("false", false),
+					Entry("integer", 1),
+					Entry("floating number", 1.0),
+					Entry("null", nil),
+					Entry("true", true),
+					Entry("false", false),
 				)
 
 				Context("using a fake validation func", func() {
