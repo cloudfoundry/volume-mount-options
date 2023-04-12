@@ -2,7 +2,7 @@ package volume_mount_options_test
 
 import (
 	vmo "code.cloudfoundry.org/volume-mount-options"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
