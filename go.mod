@@ -1,5 +1,7 @@
 module code.cloudfoundry.org/volume-mount-options
 
+go 1.20
+
 require (
 	github.com/google/gofuzz v1.2.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.6.1
@@ -21,5 +23,3 @@ require (
 	golang.org/x/tools v0.7.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-go 1.20
