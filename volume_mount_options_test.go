@@ -3,7 +3,6 @@ package volume_mount_options_test
 import (
 	"errors"
 	"fmt"
-	"github.com/onsi/ginkgo/v2/dsl/table"
 
 	vmo "code.cloudfoundry.org/volume-mount-options"
 	volumemountoptionsfakes "code.cloudfoundry.org/volume-mount-options/volume-mount-optionsfakes"
@@ -106,7 +105,7 @@ var _ = Describe("VolumeMountOptions", func() {
 					})
 				})
 
-				table.DescribeTable("with non string user options", func(userValue interface{}) {
+				DescribeTable("with non string user options", func(userValue interface{}) {
 					fakeValidationFuncI = &volumemountoptionsfakes.FakeUserOptsValidation{}
 					userInput = map[string]interface{}{
 						"opt1": userValue,
