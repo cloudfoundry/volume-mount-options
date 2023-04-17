@@ -23,3 +23,9 @@ require (
 	golang.org/x/tools v0.7.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+retract (
+	v1.1.1 // Contains retractions
+	v1.1.0 // Published before v0.3.0, presumably by accident
+	v1.0.0 // Published before v0.1.0, presumably by accident
+)
