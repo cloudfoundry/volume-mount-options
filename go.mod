@@ -25,7 +25,7 @@ require (
 )
 
 retract (
-  v1.0.0 // Published before v0.1.0, presumably by accident
-  v1.1.0 // Published before v0.3.0, presumably by accident
-  v1.1.1 // Contains retractions
+	v1.1.1 // Contains retractions
+	v1.1.0 // Published before v0.3.0, presumably by accident
+	v1.0.0 // Published before v0.1.0, presumably by accident
 )
