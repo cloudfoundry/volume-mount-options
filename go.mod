@@ -7,7 +7,7 @@ toolchain go1.21.0
 require (
 	github.com/google/gofuzz v1.2.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.7.0
-	github.com/onsi/ginkgo/v2 v2.12.0
+	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.27.10
 )
 
@@ -20,7 +20,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.14.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/tools v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
