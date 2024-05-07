@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/volume-mount-options
 
-go 1.22.2
+go 1.22.3
 
 require (
 	github.com/google/gofuzz v1.2.0
