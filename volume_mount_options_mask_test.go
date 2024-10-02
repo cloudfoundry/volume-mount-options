@@ -134,7 +134,7 @@ var _ = Describe("VolumeMountOptionsMask", func() {
 				})
 
 				It("should return an error", func() {
-					Expect(err.Error()).To(Equal(`Invalid sloppy_mount option: strconv.ParseBool: parsing "invalid": invalid syntax`))
+					Expect(err.Error()).To(Equal(`invalid sloppy_mount option: strconv.ParseBool: parsing "invalid": invalid syntax`))
 				})
 			})
 		})
