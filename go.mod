@@ -5,8 +5,8 @@ go 1.25.0
 require (
 	github.com/google/gofuzz v1.2.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
-	github.com/onsi/ginkgo/v2 v2.31.0
-	github.com/onsi/gomega v1.42.0
+	github.com/onsi/ginkgo/v2 v2.32.0
+	github.com/onsi/gomega v1.42.1
 )
 
 require (
@@ -21,7 +21,7 @@ require (
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 )
 
 retract (
